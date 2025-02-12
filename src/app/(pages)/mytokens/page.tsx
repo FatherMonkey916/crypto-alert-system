@@ -63,7 +63,7 @@ export default function TokensPage() {
           <h1 className="text-3xl font-bold">Tracked Tokens</h1>
           <Button onClick={() => openModal()} className="p-6">
             <PlusIcon className="w-4 h-4 mr-2" />
-            Add Token
+            Add Token 
           </Button>
         </div>
         <div className="flex items-center space-x-2">
