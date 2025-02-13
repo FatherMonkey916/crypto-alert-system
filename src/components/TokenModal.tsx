@@ -5,6 +5,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
+
 
 interface TokenModalProps {
   isOpen: boolean
@@ -15,10 +25,12 @@ interface TokenModalProps {
     symbol: string
     address: string
     chain: string
+    frequency: string
     buyThreshold: number
     sellThreshold: number
   } | null
 }
+
 
 export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }) => {
   const [formData, setFormData] = useState({
@@ -26,10 +38,13 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
     symbol: "",
     address: "",
     chain: "",
+    frequency: "",
     buyThreshold: "",
     sellThreshold: "",
   })
-
+  const [position, setPosition] = useState("bottom")
+  // const [frequency2, setFrequency2] = useState(token?.frequency)
+  // const [frequency3, setFrequency3] = useState(token?.frequency)
   useEffect(() => {
     if (token) {
       setFormData({
@@ -37,6 +52,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
         symbol: token.symbol,
         address: token.address,
         chain: token.chain,
+        frequency: token.frequency,
         buyThreshold: token.buyThreshold.toString(),
         sellThreshold: token.sellThreshold.toString(),
       })
@@ -46,6 +62,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
         symbol: "",
         address: "",
         chain: "",
+        frequency: "",
         buyThreshold: "",
         sellThreshold: "",
       })
@@ -63,6 +80,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
     console.log(formData)
     onClose()
   }
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -89,6 +107,27 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
               <Input id="chain" name="chain" value={formData.chain} onChange={handleChange} required />
             </div>
             <div>
+              <Label htmlFor="frequency">Frequency</Label>
+              <br></br>
+              {/* <Input id="frequency" name="frequency" value={formData.frequency} onChange={handleChange} required /> */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">{formData.frequency}</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuRadioGroup value={formData.frequency} onValueChange={(value) => setFormData(prevState => ({
+                    ...prevState,
+                    frequency: value
+                  }))}>
+                    <DropdownMenuRadioItem value="Hourly">Hourly</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Daily">Daily</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Weekly">Weekly</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div>
               <Label htmlFor="buyThreshold">Buy Threshold</Label>
               <Input
                 id="buyThreshold"
@@ -111,7 +150,9 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
               />
             </div>
           </div>
-          <Button type="submit">{token ? "Update Token" : "Add Token"}</Button>
+          <div className="flex justify-center">
+            <Button type="submit">{token ? "Update Token" : "Add Token"}</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

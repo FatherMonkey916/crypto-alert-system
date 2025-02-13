@@ -17,6 +17,7 @@ export default function TokensPage() {
     symbol: string;
     address: string;
     chain: string;
+    frequency: string;
     buyThreshold: number;
     sellThreshold: number;
   }
@@ -29,6 +30,7 @@ export default function TokensPage() {
       symbol: "ETH",
       address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
       chain: "Ethereum",
+      frequency: "Hourly",
       buyThreshold: 1900,
       sellThreshold: 2100,
     },
@@ -38,16 +40,19 @@ export default function TokensPage() {
       symbol: "BTC",
       address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
       chain: "Bitcoin",
+      frequency: "Weekly",
       buyThreshold: 28000,
       sellThreshold: 32000,
     },
-    { id: 3,
-      name: "Solana", 
-      symbol: "SOL", 
-      address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2", 
-      chain: "Solana", 
-      buyThreshold: 18, 
-      sellThreshold: 22 
+    {
+      id: 3,
+      name: "Solana",
+      symbol: "SOL",
+      address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
+      chain: "Solana",
+      frequency: "Weekly",
+      buyThreshold: 18,
+      sellThreshold: 22
     },
   ]
 
@@ -63,7 +68,7 @@ export default function TokensPage() {
           <h1 className="text-3xl font-bold">Tracked Tokens</h1>
           <Button onClick={() => openModal()} className="p-6">
             <PlusIcon className="w-4 h-4 mr-2" />
-            Add Token 
+            Add Token
           </Button>
         </div>
         <div className="flex items-center space-x-2">
@@ -77,6 +82,7 @@ export default function TokensPage() {
               <TableHead>Symbol</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Chain</TableHead>
+              <TableHead>Frequency</TableHead>
               <TableHead>Buy Threshold</TableHead>
               <TableHead>Sell Threshold</TableHead>
               <TableHead>Actions</TableHead>
@@ -86,10 +92,11 @@ export default function TokensPage() {
             {tokens.map((token) => (
               <TableRow key={token.id}>
                 <TableCell>{token.id}</TableCell>
-                <TableCell>{token.name}</TableCell>
+                <TableCell><b>{token.name}</b></TableCell>
                 <TableCell>{token.symbol}</TableCell>
                 <TableCell className="w-[350px]">{token.address}</TableCell>
                 <TableCell>{token.chain}</TableCell>
+                <TableCell>{token.frequency}</TableCell>
                 <TableCell>${token.buyThreshold}</TableCell>
                 <TableCell>${token.sellThreshold}</TableCell>
                 <TableCell>
