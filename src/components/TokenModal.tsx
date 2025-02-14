@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -13,7 +13,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
+} from "./ui/dropdown-menu";
+import axios, { AxiosResponse } from "axios";
 
 
 interface TokenModalProps {
@@ -21,17 +22,16 @@ interface TokenModalProps {
   isOpen: boolean
   onClose: () => void
   token?: {
-    id?: number
-    name: string
-    symbol: string
-    address: string
-    chain: string
-    frequency: string
-    buyThreshold: number
-    sellThreshold: number
-  } | null
+    id?: number;
+    name: string;
+    symbol: string;
+    address: string;
+    chain: string;
+    frequency: string;
+    buyThreshold: number;
+    sellThreshold: number;
+  } | null;
 }
-
 
 export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, token }) => {
   const [formData, setFormData] = useState({
@@ -54,7 +54,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         frequency: token.frequency,
         buyThreshold: token.buyThreshold.toString(),
         sellThreshold: token.sellThreshold.toString(),
-      })
+      });
     } else {
       setFormData({
         name: "",
@@ -64,22 +64,60 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         frequency: "",
         buyThreshold: "",
         sellThreshold: "",
-      })
+      });
     }
-  }, [token])
+  }, [token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log(formData)
-    onClose()
-  }
+  const postData = async (e: React.FormEvent) => {
+    console.log("hello postdata");
+    e.preventDefault();
+    try {
+      console.log("Data being sent:", formData); // Crucial: Inspect the data
 
+      const response: AxiosResponse<TokenModalProps> = await axios.post(
+        'http://localhost:5000/api/tokens/', // Add http://
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json', // Explicitly set the content type
+          },
+        }
+      );
+
+      console.log("Response:", response.data); // Inspect the response
+      // toast({
+      //   title: "alert",
+      //   description: `${response.data}`,
+      // })
+      onClose();
+    } catch (error: any) {
+      console.error("Error sending data:", error);
+
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+        console.error("Response headers:", error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.error("No response received:", error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error message:", error.message);
+      }
+      console.error("Error config:", error.config); // Log the configuration
+    } finally {
+      onClose(); // Ensure onClose is always called
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -90,42 +128,73 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         <DialogDescription>
           {type === "home" ? "Fill in the details to add a new token." : "Edit the token details below."}
         </DialogDescription>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={postData} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Token Name</Label>
-              <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="symbol">Symbol</Label>
-              <Input id="symbol" name="symbol" value={formData.symbol} onChange={handleChange} required />
+              <Input
+                id="symbol"
+                name="symbol"
+                value={formData.symbol}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="address">Contract Address</Label>
-              <Input id="address" name="address" value={formData.address} onChange={handleChange} required />
+              <Input
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="chain">Chain</Label>
-              <Input id="chain" name="chain" value={formData.chain} onChange={handleChange} required />
+              <Input
+                id="chain"
+                name="chain"
+                value={formData.chain}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="frequency">Frequency</Label>
               <br></br>
-              {/* <Input id="frequency" name="frequency" value={formData.frequency} onChange={handleChange} required /> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">{formData.frequency}</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
-                  <DropdownMenuRadioGroup value={formData.frequency} onValueChange={(value) => setFormData(prevState => ({
-                    ...prevState,
-                    frequency: value
-                  }))}>
-                    <DropdownMenuRadioItem value="Hourly">Hourly</DropdownMenuRadioItem>
+                  <DropdownMenuRadioGroup
+                    value={formData.frequency}
+                    onValueChange={(value) =>
+                      setFormData((prevState) => ({
+                        ...prevState,
+                        frequency: value,
+                      }))
+                    }
+                  >
+                    <DropdownMenuRadioItem value="Hourly">
+                      Hourly
+                    </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="Daily">Daily</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Weekly">Weekly</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Weekly">
+                      Weekly
+                    </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
-
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -158,6 +227,5 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
-
+  );
+};
