@@ -1,89 +1,142 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PlusIcon, Pencil, Trash2 } from "lucide-react"
-import { TokenInforModal } from "@/components/TokenInforModal"
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button"; // Importing ShadCN Button
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis } from "@/components/ui/pagination";
+import axios from "axios";
+
+interface TokenType {
+  id: number;
+  name: string;
+  symbol: string;
+  price: number;
+  percent_change_1h: number;
+  percent_change_24h: number;
+  percent_change_7d: number;
+  market_cap: number;
+  volume_24h: number;
+  circulating_supply: number;
+}
 
 export default function DashboardPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingToken, setEditingToken] = useState<TokenType | null>(null) // Corrected type here!
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState("");
+  const [tokens, setTokens] = useState<TokenType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 100; // Number of items per page
 
-  interface TokenType {
-    id: number
-    name: string,
-    symbol: string,
-    price: number
-    hourly: number
-    daily: number
-    weekly: number
-    marketCap: number
-    volumes: number
-    circulating_Supply: number
+  useEffect(() => {
+    const fetchTokens = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/data/get_token_page?page=${page}`);
+        if (Array.isArray(response.data.data)) {
+          setTokens(response.data.data);
+          setTotalPages(response.data.totalPages);
+        } else {
+          setError("Received data is not an array");
+        }
+      } catch (error) {
+        console.error("Error fetching tokens:", error);
+        setError("Failed to fetch tokens. Please try again later.");
+      }
+    };
+
+    fetchTokens();
+  }, [page]);
+
+  const filter_tokens = tokens.filter(token =>
+    token.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const formatNumber = (num: number | null = null): string => {
+    if (num === null || num === undefined) {
+      return "N/A";
+    }
+
+    if (num >= 1e9) {
+      return (num / 1e9).toFixed(1) + "B";
+    } else if (num >= 1e6) {
+      return (num / 1e6).toFixed(1) + "M";
+    } else if (num >= 1e3) {
+      return (num / 1e3).toFixed(1) + "K";
+    }
+
+    return num.toString();
+  };
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
   }
 
-  // This data would come from your API in a real application
-  const tokens = [
-    {
-      id: 1,
-      name: "Ethereum",
-      symbol: "ETH",
-      price: 0.66,
-      hourly: 100,
-      daily: 200,
-      weekly: 1900,
-      marketCap: 2100,
-      volumes: 123,
-      circulating_Supply: 234
-    },
-    {
-      id: 2,
-      name: "Bitcoin",
-      symbol: "BTC",
-      price: 0.66,
-      hourly: 100,
-      daily: 200,
-      weekly: 1900,
-      marketCap: 2100,
-      volumes: 123,
-      circulating_Supply: 234
-    },
-    {
-      id: 3,
-      name: "Solana",
-      symbol: "SOL",
-      price: 0.66,
-      hourly: 100,
-      daily: 200,
-      weekly: 1900,
-      marketCap: 2100,
-      volumes: 123,
-      circulating_Supply: 234
-    },
-  ]
+  // Pagination Logic for Modern UI
+  const getPaginationItems = () => {
+    const pages = [];
+    const maxPageButtons = 5; // Number of visible page buttons
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
-  const openModal = (token: TokenType | null = null) => { // Corrected type here!
-    setEditingToken(token)
-    setIsModalOpen(true)
-  }
+    if (totalPages > maxPageButtons && endPage === totalPages) {
+      startPage = totalPages - maxPageButtons + 1;
+    }
 
-  const filter_tokens = []
-  for (let i = 0; i < tokens.length; i++) {
-    if (tokens[i].name.includes(search)) filter_tokens.push(tokens[i])
-  }
+    if (startPage > 1) {
+      pages.push(
+        <PaginationItem key="first">
+          <PaginationLink onClick={() => setPage(1)}>1</PaginationLink>
+        </PaginationItem>
+      );
+      if (startPage > 2) {
+        pages.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+    }
 
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink isActive={i === page} onClick={() => setPage(i)}>
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      pages.push(
+        <PaginationItem key="last">
+          <PaginationLink onClick={() => setPage(totalPages)}>{totalPages}</PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return pages;
+  };
 
   return (
-    <div className="flex px-[10vw] py-6">
+    <div className="flex flex-col px-[10vw] py-6">
       <div className="space-y-6 w-full">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold p-2">Dashboard</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <Input placeholder="Search tokens..." className="max-w-sm p-6" onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Search tokens..."
+            className="max-w-sm p-6"
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <Table>
           <TableHeader>
@@ -96,27 +149,59 @@ export default function DashboardPage() {
               <TableHead>7d %</TableHead>
               <TableHead>MarketCap</TableHead>
               <TableHead>Volumes(24h)</TableHead>
-              <TableHead>Circulating Supply</TableHead>
+              <TableHead>Circulating supply</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filter_tokens.map((token) => (
-              <TableRow className="h-4" key={token.id} onClick={() => openModal(token)}>
-                <TableCell>{token.id}</TableCell>
-                <TableCell><b>{token.name}</b>  ({token.symbol})</TableCell>
-                <TableCell>{token.price}</TableCell>
-                <TableCell>{token.hourly}</TableCell>
-                <TableCell>{token.daily}</TableCell>
-                <TableCell>{token.weekly}</TableCell>
-                <TableCell>{token.marketCap}</TableCell>
-                <TableCell>{token.volumes}</TableCell>
-                <TableCell>{token.circulating_Supply}</TableCell>
+            {filter_tokens.map((token, key) => (
+              <TableRow key={token.id} className="h-4">
+                <TableCell>{(page - 1) * limit + key + 1}</TableCell>
+                <TableCell>
+                  <b>{token.name}</b> ({token.symbol})
+                </TableCell>
+                <TableCell>{token.price.toFixed(2)}</TableCell>
+                <TableCell>{token.percent_change_1h.toFixed(2)}</TableCell>
+                <TableCell>{token.percent_change_24h.toFixed(2)}</TableCell>
+                <TableCell>{token.percent_change_7d.toFixed(2)}</TableCell>
+                <TableCell>{formatNumber(token.market_cap)}</TableCell>
+                <TableCell>{formatNumber(token.volume_24h)}</TableCell>
+                <TableCell>{formatNumber(token.circulating_supply)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <TokenInforModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} />
+
+        {/* Modern Pagination UI */}
+        <div className="flex justify-center mt-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+              </PaginationItem>
+
+              {getPaginationItems()}
+
+              <PaginationItem>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
     </div>
-  )
+  );
 }
