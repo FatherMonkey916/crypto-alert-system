@@ -6,9 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"; // Importing ShadCN Button
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis } from "@/components/ui/pagination";
 import axios from "axios";
-
+import { TokenModal } from "@/components/TokenModal"
 interface TokenType {
-  id: number;
+  tokenid: number;
   name: string;
   symbol: string;
   price: number;
@@ -20,6 +20,17 @@ interface TokenType {
   circulating_supply: number;
 }
 
+interface AddTokenType {
+    tokenid: number;
+    name: string;
+    symbol: string;
+    address: string;
+    chain: string;
+    frequency: string;
+    buyThreshold: number;
+    sellThreshold: number;
+}
+
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenType[]>([]);
@@ -27,6 +38,27 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 100; // Number of items per page
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedToken, setSelectedToken] = useState<AddTokenType | null>(null)
+
+  const openModal = (token: TokenType | null = null) => {
+    if (token) {
+      const newAddToken: AddTokenType = {
+        tokenid: token.tokenid,
+        name: token.name,
+        symbol: token.symbol,
+        address: '',
+        chain: '',
+        frequency: '',
+        buyThreshold: 0,
+        sellThreshold: 0,
+      };
+      setSelectedToken(newAddToken);
+    } else {
+      setSelectedToken(null); // Or potentially a default AddTokenType object if needed
+    }
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchTokens = async () => {
@@ -153,9 +185,9 @@ export default function DashboardPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filter_tokens.map((token, key) => (
-              <TableRow key={token.id} className="h-4">
-                <TableCell>{(page - 1) * limit + key + 1}</TableCell>
+            {filter_tokens.map((token, index) => (
+              <TableRow key={index} className="h-4" onClick={ () => openModal(token) }>
+                <TableCell>{(page - 1) * limit + index + 1}</TableCell>
                 <TableCell>
                   <b>{token.name}</b> ({token.symbol})
                 </TableCell>
@@ -201,6 +233,7 @@ export default function DashboardPage() {
             </PaginationContent>
           </Pagination>
         </div>
+        <TokenModal type = "home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} />
       </div>
     </div>
   );
