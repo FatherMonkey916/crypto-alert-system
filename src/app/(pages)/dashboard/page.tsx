@@ -21,14 +21,14 @@ interface TokenType {
 }
 
 interface AddTokenType {
-    tokenid: number;
-    name: string;
-    symbol: string;
-    address: string;
-    chain: string;
-    frequency: string;
-    buyThreshold: number;
-    sellThreshold: number;
+  tokenid: number;
+  name: string;
+  symbol: string;
+  address: string;
+  chain: string;
+  frequency: string;
+  buyThreshold: number;
+  sellThreshold: number;
 }
 
 export default function DashboardPage() {
@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const limit = 100; // Number of items per page
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedToken, setSelectedToken] = useState<AddTokenType | null>(null)
+  const [add, setAdd] = useState(false)
 
   const openModal = (token: TokenType | null = null) => {
     if (token) {
@@ -186,7 +187,7 @@ export default function DashboardPage() {
           </TableHeader>
           <TableBody>
             {filter_tokens.map((token, index) => (
-              <TableRow key={index} className="h-4" onClick={ () => openModal(token) }>
+              <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
                 <TableCell>{(page - 1) * limit + index + 1}</TableCell>
                 <TableCell>
                   <b>{token.name}</b> ({token.symbol})
@@ -233,7 +234,7 @@ export default function DashboardPage() {
             </PaginationContent>
           </Pagination>
         </div>
-        <TokenModal type = "home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} />
+        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)} />
       </div>
     </div>
   );

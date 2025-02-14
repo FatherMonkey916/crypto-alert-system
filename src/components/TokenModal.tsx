@@ -15,12 +15,15 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import axios, { AxiosResponse } from "axios";
+import { useToast } from "@/hooks/use-toast";
+
 
 
 interface TokenModalProps {
   type: string
   isOpen: boolean
   onClose: () => void
+  setAdd: () => void;
   token?: {
     id?: number;
     name: string;
@@ -33,17 +36,35 @@ interface TokenModalProps {
   } | null;
 }
 
-export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, token }) => {
-  const [formData, setFormData] = useState({
+interface FormData {
+  name: string;
+  symbol: string;
+  address: string;
+  chain: string;
+  frequency: string;
+  buyThreshold: number;
+  sellThreshold: number;
+}
+
+export const TokenModal: React.FC<TokenModalProps> = ({
+  type,
+  isOpen,
+  onClose,
+  setAdd,
+  token,
+}) => {
+  const [formData, setFormData] = useState<FormData>({
+
     name: "",
     symbol: "",
     address: "",
     chain: "",
     frequency: "",
-    buyThreshold: "",
-    sellThreshold: "",
+    buyThreshold: 0,
+    sellThreshold: 0,
   })
-  
+  const { toast } = useToast()
+
   useEffect(() => {
     if (token) {
       setFormData({
@@ -52,8 +73,8 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         address: token.address,
         chain: token.chain,
         frequency: token.frequency,
-        buyThreshold: token.buyThreshold.toString(),
-        sellThreshold: token.sellThreshold.toString(),
+        buyThreshold: token.buyThreshold,
+        sellThreshold: token.sellThreshold,
       });
     } else {
       setFormData({
@@ -62,8 +83,8 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
         address: "",
         chain: "",
         frequency: "",
-        buyThreshold: "",
-        sellThreshold: "",
+        buyThreshold: 0,
+        sellThreshold: 0,
       });
     }
   }, [token]);
@@ -90,10 +111,13 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
       );
 
       console.log("Response:", response.data); // Inspect the response
-      // toast({
-      //   title: "alert",
-      //   description: `${response.data}`,
-      // })
+
+      setAdd();
+      toast({
+        title: "alert",
+        description: "New token is successfully added.",
+      })
+
       onClose();
     } catch (error: any) {
       console.error("Error sending data:", error);
@@ -123,7 +147,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{ type == "home" ? "Add New Token" : (token ? "Edit Token" : "Add New Token")}</DialogTitle>
+          <DialogTitle>{type == "home" ? "Add New Token" : (token ? "Edit Token" : "Add New Token")}</DialogTitle>
         </DialogHeader>
         <DialogDescription>
           {type === "home" ? "Fill in the details to add a new token." : "Edit the token details below."}
@@ -222,7 +246,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, t
             </div>
           </div>
           <div className="flex justify-center">
-            <Button type="submit">{ type == "home" ? "Add Token" : (token ? "Update Token" : "Add Token")}</Button>
+            <Button type="submit">{type == "home" ? "Add Token" : (token ? "Update Token" : "Add Token")}</Button>
           </div>
         </form>
       </DialogContent>
