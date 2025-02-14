@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 interface TokenModalProps {
   isOpen: boolean;
   onClose: () => void;
+  setAdd: () => void;
   token?: {
     id?: number;
     name: string;
@@ -50,6 +51,7 @@ interface FormData {
 export const TokenModal: React.FC<TokenModalProps> = ({
   isOpen,
   onClose,
+  setAdd,
   token,
 }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -107,9 +109,10 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       );
 
       console.log("Response:", response.data); // Inspect the response
+      setAdd();
       toast({
         title: "alert",
-        description: `${response.data}`,
+        description: "New token is successfully added.",
       })
       onClose();
     } catch (error: any) {
