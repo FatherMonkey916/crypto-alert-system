@@ -1,19 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header"
 import { Toaster } from "@/components/ui/toaster"
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Crypto Alert System",
@@ -27,8 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-
+      <body className="antialiased" suppressHydrationWarning>
         <div className="flex h-screen bg-background">
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* <ToastProvider> */}
