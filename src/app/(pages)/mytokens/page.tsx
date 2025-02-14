@@ -111,7 +111,7 @@ export default function TokensPage() {
             ))}
           </TableBody>
         </Table>
-        <TokenModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} />
+        <TokenModal type = "mytoken" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} />
       </div>
     </div>
   )

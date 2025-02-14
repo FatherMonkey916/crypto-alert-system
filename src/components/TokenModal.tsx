@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import {
 
 
 interface TokenModalProps {
+  type: string
   isOpen: boolean
   onClose: () => void
   token?: {
@@ -32,7 +33,7 @@ interface TokenModalProps {
 }
 
 
-export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }) => {
+export const TokenModal: React.FC<TokenModalProps> = ({ type, isOpen, onClose, token }) => {
   const [formData, setFormData] = useState({
     name: "",
     symbol: "",
@@ -42,9 +43,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
     buyThreshold: "",
     sellThreshold: "",
   })
-  const [position, setPosition] = useState("bottom")
-  // const [frequency2, setFrequency2] = useState(token?.frequency)
-  // const [frequency3, setFrequency3] = useState(token?.frequency)
+  
   useEffect(() => {
     if (token) {
       setFormData({
@@ -86,8 +85,11 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{token ? "Edit Token" : "Add New Token"}</DialogTitle>
+          <DialogTitle>{ type == "home" ? "Add New Token" : (token ? "Edit Token" : "Add New Token")}</DialogTitle>
         </DialogHeader>
+        <DialogDescription>
+          {type === "home" ? "Fill in the details to add a new token." : "Edit the token details below."}
+        </DialogDescription>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -151,7 +153,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({ isOpen, onClose, token }
             </div>
           </div>
           <div className="flex justify-center">
-            <Button type="submit">{token ? "Update Token" : "Add Token"}</Button>
+            <Button type="submit">{ type == "home" ? "Add Token" : (token ? "Update Token" : "Add Token")}</Button>
           </div>
         </form>
       </DialogContent>
