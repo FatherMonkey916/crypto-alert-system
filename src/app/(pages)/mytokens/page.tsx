@@ -127,7 +127,7 @@ export default function TokensPage() {
             ))}
           </TableBody>
         </Table>
-        <TokenModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} setAdd={() => setAdd(true)} />
+        <TokenModal type="mytoken" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} setAdd={() => setAdd(!add)} />
         <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={() => { Delete(delet?._id), setIsConfirmOpen(false) }} title="Are you sure?" message="Do you really want to delete this message? This action cannot be undone." />
       </div>
     </div>

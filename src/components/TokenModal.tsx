@@ -1,15 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +17,12 @@ import {
 import axios, { AxiosResponse } from "axios";
 import { useToast } from "@/hooks/use-toast";
 
+
+
 interface TokenModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  type: string
+  isOpen: boolean
+  onClose: () => void
   setAdd: () => void;
   token?: {
     id?: number;
@@ -49,12 +47,14 @@ interface FormData {
 }
 
 export const TokenModal: React.FC<TokenModalProps> = ({
+  type,
   isOpen,
   onClose,
   setAdd,
   token,
 }) => {
   const [formData, setFormData] = useState<FormData>({
+
     name: "",
     symbol: "",
     address: "",
@@ -62,8 +62,9 @@ export const TokenModal: React.FC<TokenModalProps> = ({
     frequency: "",
     buyThreshold: 0,
     sellThreshold: 0,
-  });
+  })
   const { toast } = useToast()
+
   useEffect(() => {
     if (token) {
       setFormData({
@@ -94,6 +95,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   };
 
   const postData = async (e: React.FormEvent) => {
+    console.log("hello postdata");
     e.preventDefault();
     try {
       console.log("Data being sent:", formData); // Crucial: Inspect the data
@@ -109,11 +111,13 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       );
 
       console.log("Response:", response.data); // Inspect the response
+
       setAdd();
       toast({
         title: "alert",
         description: "New token is successfully added.",
       })
+
       onClose();
     } catch (error: any) {
       console.error("Error sending data:", error);
@@ -143,8 +147,11 @@ export const TokenModal: React.FC<TokenModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{token ? "Edit Token" : "Add New Token"}</DialogTitle>
+          <DialogTitle>{type == "home" ? "Add New Token" : (token ? "Edit Token" : "Add New Token")}</DialogTitle>
         </DialogHeader>
+        <DialogDescription>
+          {type === "home" ? "Fill in the details to add a new token." : "Edit the token details below."}
+        </DialogDescription>
         <form onSubmit={postData} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -239,7 +246,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
             </div>
           </div>
           <div className="flex justify-center">
-            <Button type="submit">{token ? "Update Token" : "Add Token"}</Button>
+            <Button type="submit">{type == "home" ? "Add Token" : (token ? "Update Token" : "Add Token")}</Button>
           </div>
         </form>
       </DialogContent>
