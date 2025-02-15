@@ -32,7 +32,8 @@ interface AddTokenType {
 }
 
 export default function DashboardPage() {
-  const [search, setSearch] = useState("");
+  const [tempQuery, setTempQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [tokens, setTokens] = useState<TokenType[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const limit = 100; // Number of items per page
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedToken, setSelectedToken] = useState<AddTokenType | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
   const [add, setAdd] = useState(false)
 
   const openModal = (token: TokenType | null = null) => {
@@ -63,8 +65,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchTokens = async () => {
+      setIsLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/data/get_token_page?page=${page}`);
+        const response = await axios.get(`http://localhost:5000/api/data/get_token_page`, {
+          params: { page, name: searchQuery },
+        });
+
         if (Array.isArray(response.data.data)) {
           setTokens(response.data.data);
           setTotalPages(response.data.totalPages);
@@ -75,14 +81,12 @@ export default function DashboardPage() {
         console.error("Error fetching tokens:", error);
         setError("Failed to fetch tokens. Please try again later.");
       }
+      setIsLoading(false);
     };
 
     fetchTokens();
-  }, [page]);
+  }, [page, searchQuery]);
 
-  const filter_tokens = tokens.filter(token =>
-    token.name.toLowerCase().includes(search.toLowerCase())
-  );
 
   const formatNumber = (num: number | null = null): string => {
     if (num === null || num === undefined) {
@@ -158,6 +162,12 @@ export default function DashboardPage() {
     return pages;
   };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchQuery(tempQuery);
+    }
+  };
+
   return (
     <div className="flex flex-col px-[10vw] py-6">
       <div className="space-y-6 w-full">
@@ -168,73 +178,86 @@ export default function DashboardPage() {
           <Input
             placeholder="Search tokens..."
             className="max-w-sm p-6"
-            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={onKeyDown}
+            onChange={(e) => setTempQuery(e.target.value)}
           />
+          <Button onClick={() => { setPage(1); setSearchQuery(tempQuery); }}>Search</Button>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>1h %</TableHead>
-              <TableHead>24h %</TableHead>
-              <TableHead>7d %</TableHead>
-              <TableHead>MarketCap</TableHead>
-              <TableHead>Volumes(24h)</TableHead>
-              <TableHead>Circulating supply</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filter_tokens.map((token, index) => (
-              <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
-                <TableCell>{(page - 1) * limit + index + 1}</TableCell>
-                <TableCell>
-                  <b>{token.name}</b> ({token.symbol})
-                </TableCell>
-                <TableCell>{token.price.toFixed(2)}</TableCell>
-                <TableCell>{token.percent_change_1h.toFixed(2)}</TableCell>
-                <TableCell>{token.percent_change_24h.toFixed(2)}</TableCell>
-                <TableCell>{token.percent_change_7d.toFixed(2)}</TableCell>
-                <TableCell>{formatNumber(token.market_cap)}</TableCell>
-                <TableCell>{formatNumber(token.volume_24h)}</TableCell>
-                <TableCell>{formatNumber(token.circulating_supply)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {
+          !isLoading ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>No</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>1h %</TableHead>
+                    <TableHead>24h %</TableHead>
+                    <TableHead>7d %</TableHead>
+                    <TableHead>MarketCap</TableHead>
+                    <TableHead>Volumes(24h)</TableHead>
+                    <TableHead>Circulating supply</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tokens.map((token, index) => (
+                    <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
+                      <TableCell>{(page - 1) * limit + index + 1}</TableCell>
+                      <TableCell>
+                        <b>{token.name}</b> ({token.symbol})
+                      </TableCell>
+                      <TableCell>{token.price.toFixed(2)}</TableCell>
+                      <TableCell>{token.percent_change_1h.toFixed(2)}</TableCell>
+                      <TableCell>{token.percent_change_24h.toFixed(2)}</TableCell>
+                      <TableCell>{token.percent_change_7d.toFixed(2)}</TableCell>
+                      <TableCell>{formatNumber(token.market_cap)}</TableCell>
+                      <TableCell>{formatNumber(token.volume_24h)}</TableCell>
+                      <TableCell>{formatNumber(token.circulating_supply)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-        {/* Modern Pagination UI */}
-        <div className="flex justify-center mt-6">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                >
-                  Previous
-                </Button>
-              </PaginationItem>
+              {/* Modern Pagination UI */}
+              <div className="flex justify-center mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                      >
+                        Previous
+                      </Button>
+                    </PaginationItem>
 
-              {getPaginationItems()}
+                    {getPaginationItems()}
 
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === totalPages}
-                >
-                  Next
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)} />
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div></>
+          ) : (
+            <>
+              <div className='flex h-[70vh] items-center justify-center'>
+                <div className='h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#3a748d]'></div>
+              </div>
+            </>
+          )
+        }
+        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)}/>
       </div>
     </div>
   );
