@@ -1,18 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PlusIcon, Pencil, Trash2 } from "lucide-react"
 import { TokenModal } from "@/components/TokenModal"
+import axios, { AxiosResponse } from "axios"
+import { useToast } from "@/hooks/use-toast";
+import ConfirmModal from "@/components/ConfirmModal"
 
 export default function TokensPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingToken, setEditingToken] = useState<TokenType | null>(null) // Corrected type here!
+  const [editingToken, setEditingToken] = useState<TokenType | null>(null)
+  const [tokens, setTokens] = useState<TokenType[]>([])
+  const { toast } = useToast()
+  const [remove, setRemove] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [delet, setDelet] = useState<TokenType | null>(null)
+  const [add, setAdd] = useState(false);
+
 
   interface TokenType {
-    id: number;
+    _id: number;
     name: string;
     symbol: string;
     address: string;
@@ -22,43 +32,49 @@ export default function TokensPage() {
     sellThreshold: number;
   }
 
-  // This data would come from your API in a real application
-  const tokens = [
-    {
-      id: 1,
-      name: "Ethereum",
-      symbol: "ETH",
-      address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
-      chain: "Ethereum",
-      frequency: "Hourly",
-      buyThreshold: 1900,
-      sellThreshold: 2100,
-    },
-    {
-      id: 2,
-      name: "Bitcoin",
-      symbol: "BTC",
-      address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
-      chain: "Bitcoin",
-      frequency: "Weekly",
-      buyThreshold: 28000,
-      sellThreshold: 32000,
-    },
-    {
-      id: 3,
-      name: "Solana",
-      symbol: "SOL",
-      address: "0x366e3D6e3a734e15de6428B0d391C41C0805cbd2",
-      chain: "Solana",
-      frequency: "Weekly",
-      buyThreshold: 18,
-      sellThreshold: 22
-    },
-  ]
+  const fetchTokens = async () => {
+    try {
+      const response: AxiosResponse<TokenType[]> = await axios.get(
+        'http://localhost:5000/api/tokens/',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setTokens(response.data); // Set tokens in state
+    } catch (error: any) {
+      console.error("Error fetching tokens:", error);
+    }
+  };
 
-  const openModal = (token: TokenType | null = null) => { // Corrected type here!
-    setEditingToken(token)
-    setIsModalOpen(true)
+  const Delete = async (tokenid: any) => {
+    try {
+      console.log(tokenid);
+      const response: AxiosResponse<TokenType[]> = await axios.delete(
+        `http://localhost:5000/api/tokens/${tokenid}`
+      )
+      toast({
+        title: "alert",
+        description: "Token is successfully deleted.",
+      })
+      setRemove(!remove)
+    } catch (error: any) {
+      console.error("Error fetching tokens:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchTokens(); // Call fetchTokens on component mount
+  }, [remove, add]);
+
+  const openModal = (token: TokenType | null = null) => {
+    setEditingToken(token);
+    setIsModalOpen(true);
+  }
+  const openConfirm = (token: TokenType | null = null) => {
+    setDelet(token);
+    setIsConfirmOpen(true);
   }
 
   return (
@@ -89,9 +105,9 @@ export default function TokensPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tokens.map((token) => (
-              <TableRow key={token.id}>
-                <TableCell>{token.id}</TableCell>
+            {tokens.map((token, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell><b>{token.name}</b></TableCell>
                 <TableCell>{token.symbol}</TableCell>
                 <TableCell className="w-[350px]">{token.address}</TableCell>
@@ -103,7 +119,7 @@ export default function TokensPage() {
                   <Button variant="ghost" size="sm" onClick={() => openModal(token)}>
                     <Pencil className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => openConfirm(token)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </TableCell>
@@ -111,7 +127,8 @@ export default function TokensPage() {
             ))}
           </TableBody>
         </Table>
-        <TokenModal type = "mytoken" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} />
+        <TokenModal type="mytoken" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={editingToken} setAdd={() => setAdd(!add)} />
+        <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} onConfirm={() => { Delete(delet?._id), setIsConfirmOpen(false) }} title="Are you sure?" message="Do you really want to delete this message? This action cannot be undone." />
       </div>
     </div>
   )

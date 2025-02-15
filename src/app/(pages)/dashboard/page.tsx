@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedToken, setSelectedToken] = useState<AddTokenType | null>(null)
   const [isLoading, setIsLoading] = useState(false);
+  const [add, setAdd] = useState(false)
 
   const openModal = (token: TokenType | null = null) => {
     if (token) {
@@ -256,7 +257,7 @@ export default function DashboardPage() {
             </>
           )
         }
-        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} />
+        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)}/>
       </div>
     </div>
   );
