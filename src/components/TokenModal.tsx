@@ -25,7 +25,7 @@ interface TokenModalProps {
   onClose: () => void
   setAdd: () => void;
   token?: {
-    id?: number;
+    tokenid: number;
     name: string;
     symbol: string;
     address: string;
@@ -37,6 +37,7 @@ interface TokenModalProps {
 }
 
 interface FormData {
+  tokenid: number;
   name: string;
   symbol: string;
   address: string;
@@ -54,7 +55,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   token,
 }) => {
   const [formData, setFormData] = useState<FormData>({
-
+    tokenid: 0,
     name: "",
     symbol: "",
     address: "",
@@ -68,6 +69,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   useEffect(() => {
     if (token) {
       setFormData({
+        tokenid: token.tokenid,
         name: token.name,
         symbol: token.symbol,
         address: token.address,
@@ -78,6 +80,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       });
     } else {
       setFormData({
+        tokenid: 0,
         name: "",
         symbol: "",
         address: "",
@@ -100,7 +103,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
     try {
       console.log("Data being sent:", formData); // Crucial: Inspect the data
 
-      const response: AxiosResponse<TokenModalProps> = await axios.post(
+      const response: AxiosResponse<any> = await axios.post(
         'http://localhost:5000/api/tokens/', // Add http://
         formData,
         {
@@ -115,7 +118,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       setAdd();
       toast({
         title: "alert",
-        description: "New token is successfully added.",
+        description: `${response.data.message}`,
       })
 
       onClose();
@@ -211,12 +214,12 @@ export const TokenModal: React.FC<TokenModalProps> = ({
                       }))
                     }
                   >
-                    <DropdownMenuRadioItem value="Hourly">
-                      Hourly
+                    <DropdownMenuRadioItem value="hourly">
+                      hourly
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Daily">Daily</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Weekly">
-                      Weekly
+                    <DropdownMenuRadioItem value="daily">daily</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="weekly">
+                      weekly
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>

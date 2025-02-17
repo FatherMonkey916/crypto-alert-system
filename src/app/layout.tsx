@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/header"
-import { Toaster } from "@/components/ui/toaster"
-import { ToastProvider, ToastViewport } from "@/components/ui/toast";
+import ClientLayout from "./client-layout";
 
 export const metadata: Metadata = {
   title: "Crypto Alert System",
@@ -17,17 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
-        <div className="flex h-screen bg-background">
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* <ToastProvider> */}
-            {/* Other components */}
-            {/* <ToastViewport className="fixed top-0 right-0 p-4" /> */}
-            {/* </ToastProvider> */}
-            <Header />
-            <Toaster />
-            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background">{children}</main>
-          </div>
-        </div>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

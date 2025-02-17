@@ -6,7 +6,7 @@ export default function About() {
   return (
     <>
       <Head>
-        <title>About | Crypto Alert System</title>
+        <title>About | Crypto Price Notification System</title>
         <meta
           name="description"
           content="Learn about our powerful crypto notification system that tracks token prices and sends instant alerts."
@@ -17,7 +17,7 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-6 py-20">
           {/* Header Section */}
           <h1 className="text-5xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-            Crypto Alert System
+            Crypto Price Notifiction System
           </h1>
           <p className="text-center mt-4 text-lg text-gray-300">
             Track crypto token prices across Ethereum, Layer 2s, and Solana with instant email notifications.

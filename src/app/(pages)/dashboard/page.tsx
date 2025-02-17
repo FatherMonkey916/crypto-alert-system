@@ -169,7 +169,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col px-[10vw] py-6">
+    <div className="flex flex-col px-[5vw] py-32">
       <div className="space-y-6 w-full">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold p-2">Dashboard</h1>
@@ -190,6 +190,7 @@ export default function DashboardPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>No</TableHead>
+                    <TableHead>TokenId</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>1h %</TableHead>
@@ -204,6 +205,7 @@ export default function DashboardPage() {
                   {tokens.map((token, index) => (
                     <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
                       <TableCell>{(page - 1) * limit + index + 1}</TableCell>
+                      <TableCell>{token.tokenid}</TableCell>
                       <TableCell>
                         <b>{token.name}</b> ({token.symbol})
                       </TableCell>
@@ -257,7 +259,7 @@ export default function DashboardPage() {
             </>
           )
         }
-        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)}/>
+        <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)} />
       </div>
     </div>
   );

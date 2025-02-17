@@ -58,7 +58,7 @@ export default function Received() {
   ];
 
   return (
-    <div className="flex px-[10vw] py-6">
+    <div className="flex px-[5vw] py-32">
       <div className="space-y-6 w-full">
         {/* Header */}
         <div className="flex justify-between items-center">
