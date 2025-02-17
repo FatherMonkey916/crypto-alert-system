@@ -41,7 +41,7 @@ export default function SettingsPage() {
     try {
       console.log("Data being sent:", settings); // Crucial: Inspect the data
 
-      const response: AxiosResponse<gmail> = await axios.post(
+      const response: AxiosResponse<any> = await axios.post(
         'http://localhost:5000/api/gmail/', // Add http://
         settings,
         {
@@ -54,7 +54,7 @@ export default function SettingsPage() {
       console.log("Response:", response.data); // Inspect the response
       toast({
         title: "alert",
-        description: "New token is successfully added.",
+        description: `${response.data.message}`,
       })
     } catch (error: any) {
       console.error("Error sending data:", error);
