@@ -25,7 +25,7 @@ interface TokenModalProps {
   onClose: () => void
   setAdd: () => void;
   token?: {
-    id: number;
+    tokenid: number;
     name: string;
     symbol: string;
     address: string;
@@ -37,7 +37,7 @@ interface TokenModalProps {
 }
 
 interface FormData {
-  tokenId: number;
+  tokenid: number;
   name: string;
   symbol: string;
   address: string;
@@ -55,7 +55,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   token,
 }) => {
   const [formData, setFormData] = useState<FormData>({
-    tokenId: 0,
+    tokenid: 0,
     name: "",
     symbol: "",
     address: "",
@@ -69,7 +69,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   useEffect(() => {
     if (token) {
       setFormData({
-        tokenId: token.id,
+        tokenid: token.tokenid,
         name: token.name,
         symbol: token.symbol,
         address: token.address,
@@ -80,7 +80,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       });
     } else {
       setFormData({
-        tokenId: 0,
+        tokenid: 0,
         name: "",
         symbol: "",
         address: "",
@@ -214,12 +214,12 @@ export const TokenModal: React.FC<TokenModalProps> = ({
                       }))
                     }
                   >
-                    <DropdownMenuRadioItem value="Hourly">
-                      Hourly
+                    <DropdownMenuRadioItem value="hourly">
+                      hourly
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Daily">Daily</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="Weekly">
-                      Weekly
+                    <DropdownMenuRadioItem value="daily">daily</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="weekly">
+                      weekly
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>

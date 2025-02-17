@@ -8,7 +8,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import axios from "axios";
 import { TokenModal } from "@/components/TokenModal"
 interface TokenType {
-  id: number;
+  tokenid: number;
   name: string;
   symbol: string;
   price: number;
@@ -21,7 +21,7 @@ interface TokenType {
 }
 
 interface AddTokenType {
-  id: number;
+  tokenid: number;
   name: string;
   symbol: string;
   address: string;
@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const openModal = (token: TokenType | null = null) => {
     if (token) {
       const newAddToken: AddTokenType = {
-        id: token.id,
+        tokenid: token.tokenid,
         name: token.name,
         symbol: token.symbol,
         address: '',
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                   {tokens.map((token, index) => (
                     <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
                       <TableCell>{(page - 1) * limit + index + 1}</TableCell>
-                      <TableCell>{token.id}</TableCell>
+                      <TableCell>{token.tokenid}</TableCell>
                       <TableCell>
                         <b>{token.name}</b> ({token.symbol})
                       </TableCell>
