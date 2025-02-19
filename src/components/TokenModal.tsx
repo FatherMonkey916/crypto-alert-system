@@ -25,7 +25,7 @@ interface TokenModalProps {
   onClose: () => void
   setAdd: () => void;
   token?: {
-    tokenid: number;
+    tokenId: number;
     name: string;
     symbol: string;
     address: string;
@@ -37,7 +37,7 @@ interface TokenModalProps {
 }
 
 interface FormData {
-  tokenid: number;
+  tokenId: number;
   name: string;
   symbol: string;
   address: string;
@@ -55,7 +55,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   token,
 }) => {
   const [formData, setFormData] = useState<FormData>({
-    tokenid: 0,
+    tokenId: 0,
     name: "",
     symbol: "",
     address: "",
@@ -69,7 +69,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
   useEffect(() => {
     if (token) {
       setFormData({
-        tokenid: token.tokenid,
+        tokenId: token.tokenId,
         name: token.name,
         symbol: token.symbol,
         address: token.address,
@@ -80,7 +80,7 @@ export const TokenModal: React.FC<TokenModalProps> = ({
       });
     } else {
       setFormData({
-        tokenid: 0,
+        tokenId: 0,
         name: "",
         symbol: "",
         address: "",
