@@ -67,7 +67,11 @@ export default function DashboardPage() {
     const fetchTokens = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/data/get_token_page`, {
+        // const response = await axios.get(`http://localhost:5000/api/data/get_coinmarketcap_all_tokens`, {
+        //   params: { page, name: searchQuery },
+        // });
+
+        const response = await axios.get(`http://localhost:5000/api/data/get_coingecko_all_tokens`, {
           params: { page, name: searchQuery },
         });
 
@@ -94,11 +98,11 @@ export default function DashboardPage() {
     }
 
     if (num >= 1e9) {
-      return (num / 1e9).toFixed(1) + "B";
+      return (num / 1e9)?.toFixed(1) + "B";
     } else if (num >= 1e6) {
-      return (num / 1e6).toFixed(1) + "M";
+      return (num / 1e6)?.toFixed(1) + "M";
     } else if (num >= 1e3) {
-      return (num / 1e3).toFixed(1) + "K";
+      return (num / 1e3)?.toFixed(1) + "K";
     }
 
     return num.toString();
