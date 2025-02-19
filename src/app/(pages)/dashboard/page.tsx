@@ -7,8 +7,24 @@ import { Button } from "@/components/ui/button"; // Importing ShadCN Button
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis } from "@/components/ui/pagination";
 import axios from "axios";
 import { TokenModal } from "@/components/TokenModal"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+
 interface TokenType {
-  tokenid: number;
+  tokenId: number;
   name: string;
   symbol: string;
   price: number;
@@ -18,10 +34,11 @@ interface TokenType {
   market_cap: number;
   volume_24h: number;
   circulating_supply: number;
+  chain: string;
 }
 
 interface AddTokenType {
-  tokenid: number;
+  tokenId: number;
   name: string;
   symbol: string;
   address: string;
@@ -43,15 +60,16 @@ export default function DashboardPage() {
   const [selectedToken, setSelectedToken] = useState<AddTokenType | null>(null)
   const [isLoading, setIsLoading] = useState(false);
   const [add, setAdd] = useState(false)
+  const [tab, setTab] = useState("CMC")
 
   const openModal = (token: TokenType | null = null) => {
     if (token) {
       const newAddToken: AddTokenType = {
-        tokenid: token.tokenid,
+        tokenId: token.tokenId,
         name: token.name,
         symbol: token.symbol,
         address: '',
-        chain: '',
+        chain: token.chain,
         frequency: '',
         buyThreshold: 0,
         sellThreshold: 0,
@@ -65,31 +83,55 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchTokens = async () => {
-      setIsLoading(true);
-      try {
-        // const response = await axios.get(`http://localhost:5000/api/data/get_coinmarketcap_all_tokens`, {
-        //   params: { page, name: searchQuery },
-        // });
+      if (tab == "CMC") {
+        // setIsLoading(true);
+        // try {
+        //   const response = await axios.get(`http://localhost:5000/api/data/get_token_page`, {
+        //     params: { page, name: searchQuery },
+        //   });
 
-        const response = await axios.get(`http://localhost:5000/api/data/get_coingecko_all_tokens`, {
-          params: { page, name: searchQuery },
-        });
-
-        if (Array.isArray(response.data.data)) {
-          setTokens(response.data.data);
-          setTotalPages(response.data.totalPages);
-        } else {
-          setError("Received data is not an array");
-        }
-      } catch (error) {
-        console.error("Error fetching tokens:", error);
-        setError("Failed to fetch tokens. Please try again later.");
+        //   if (Array.isArray(response.data.data)) {
+        //     setTokens(response.data.data);
+        //     setTotalPages(response.data.totalPages);
+        //   } else {
+        //     setError("Received data is not an array");
+        //   }
+        // } catch (error) {
+        //   console.error("Error fetching tokens:", error);
+        //   setError("Failed to fetch tokens. Please try again later.");
+        // }
+        // setIsLoading(false);
       }
-      setIsLoading(false);
+      if (tab == "CG") {
+        setIsLoading(true);
+        try {
+          const response = await axios.get(`http://localhost:5000/api/data/get_coingecko_all_tokens`, {
+            params: { page, name: searchQuery },
+          });
+
+          console.log(response.data.totalPages)
+
+          if (Array.isArray(response.data.data)) {
+            setTokens(response.data.data);
+            setTotalPages(response.data.totalPages);
+          } else {
+            setError("Received data is not an array");
+          }
+        } catch (error) {
+          console.error("Error fetching tokens:", error);
+          setError("Failed to fetch tokens. Please try again later.");
+        }
+        setIsLoading(false);
+      }
     };
 
     fetchTokens();
-  }, [page, searchQuery]);
+  }, [page, searchQuery, tab]);
+
+  const changeTab = (e: any) => {
+    console.log(e);
+    setTab(e)
+  }
 
 
   const formatNumber = (num: number | null = null): string => {
@@ -187,7 +229,171 @@ export default function DashboardPage() {
           />
           <Button onClick={() => { setPage(1); setSearchQuery(tempQuery); }}>Search</Button>
         </div>
-        {
+        <Tabs value={tab} onValueChange={(e) => changeTab(e)}>
+          <TabsList className="grid w-full grid-cols-2" >
+            <TabsTrigger value="CMC">CoinMarketCap</TabsTrigger>
+            <TabsTrigger value="CG">CoinGecko</TabsTrigger>
+          </TabsList>
+          <TabsContent value="CMC">
+
+            {
+              !isLoading ? (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>No</TableHead>
+                        <TableHead>TokenId</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>1h %</TableHead>
+                        <TableHead>24h %</TableHead>
+                        <TableHead>7d %</TableHead>
+                        <TableHead>MarketCap</TableHead>
+                        <TableHead>Volumes(24h)</TableHead>
+                        <TableHead>Circulating supply</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tokens.map((token, index) => (
+                        <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
+                          <TableCell>{(page - 1) * limit + index + 1}</TableCell>
+                          <TableCell>{token.tokenId}</TableCell>
+                          <TableCell>
+                            <b>{token.name}</b> ({token.symbol})
+                          </TableCell>
+                          <TableCell>{token.price.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_1h.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_24h.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_7d.toFixed(2)}</TableCell>
+                          <TableCell>{formatNumber(token.market_cap)}</TableCell>
+                          <TableCell>{formatNumber(token.volume_24h)}</TableCell>
+                          <TableCell>{formatNumber(token.circulating_supply)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+
+                  {/* Modern Pagination UI */}
+                  <div className="flex justify-center mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(page - 1)}
+                            disabled={page === 1}
+                          >
+                            Previous
+                          </Button>
+                        </PaginationItem>
+
+                        {getPaginationItems()}
+
+                        <PaginationItem>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(page + 1)}
+                            disabled={page === totalPages}
+                          >
+                            Next
+                          </Button>
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div></>
+              ) : (
+                <>
+                  <div className='flex h-[70vh] items-center justify-center'>
+                    <div className='h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#3a748d]'></div>
+                  </div>
+                </>
+              )
+            }
+          </TabsContent>
+          <TabsContent value="CG">
+            {
+              !isLoading ? (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>No</TableHead>
+                        <TableHead>TokenId</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>1h %</TableHead>
+                        <TableHead>24h %</TableHead>
+                        <TableHead>7d %</TableHead>
+                        <TableHead>MarketCap</TableHead>
+                        <TableHead>Volumes(24h)</TableHead>
+                        <TableHead>Circulating supply</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tokens.map((token, index) => (
+                        <TableRow key={index} className="h-4" onClick={() => openModal(token)}>
+                          <TableCell>{(page - 1) * limit + index + 1}</TableCell>
+                          <TableCell>{token.tokenId}</TableCell>
+                          <TableCell>
+                            <b>{token.name}</b> ({token.symbol})
+                          </TableCell>
+                          <TableCell>{token.price.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_1h.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_24h.toFixed(2)}</TableCell>
+                          <TableCell>{token.percent_change_7d.toFixed(2)}</TableCell>
+                          <TableCell>{formatNumber(token.market_cap)}</TableCell>
+                          <TableCell>{formatNumber(token.volume_24h)}</TableCell>
+                          <TableCell>{formatNumber(token.circulating_supply)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+
+                  {/* Modern Pagination UI */}
+                  <div className="flex justify-center mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(page - 1)}
+                            disabled={page === 1}
+                          >
+                            Previous
+                          </Button>
+                        </PaginationItem>
+
+                        {getPaginationItems()}
+
+                        <PaginationItem>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(page + 1)}
+                            disabled={page === totalPages}
+                          >
+                            Next
+                          </Button>
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div></>
+              ) : (
+                <>
+                  <div className='flex h-[70vh] items-center justify-center'>
+                    <div className='h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-[#3a748d]'></div>
+                  </div>
+                </>
+              )
+            }
+          </TabsContent>
+        </Tabs>
+
+        {/* {
           !isLoading ? (
             <>
               <Table>
@@ -225,7 +431,7 @@ export default function DashboardPage() {
                 </TableBody>
               </Table>
 
-              {/* Modern Pagination UI */}
+              
               <div className="flex justify-center mt-6">
                 <Pagination>
                   <PaginationContent>
@@ -262,7 +468,7 @@ export default function DashboardPage() {
               </div>
             </>
           )
-        }
+        } */}
         <TokenModal type="home" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} token={selectedToken} setAdd={() => setAdd(true)} />
       </div>
     </div>

@@ -22,7 +22,7 @@ export default function TokensPage() {
 
 
   interface TokenType {
-    id: number;
+    tokenId: number;
     _id: number;
     name: string;
     symbol: string;
